@@ -3,6 +3,7 @@ from models import User as UserModel
 from fastapi import FastAPI
 from pydantic import BaseModel
 from auth import hash_password, verify_password
+from pydantic import ConfigDict
 
 app = FastAPI()
 
@@ -31,6 +32,15 @@ class User(BaseModel):
 users = []
 
 
+
+class UserOut(BaseModel):
+    id: int
+    name: str
+    age: int
+    email: str | None = None
+
+    model_config = ConfigDict(from_attributes=True)
+
 #@app.post("/users")
 #def create_user(user: User):
 #    users.append(user)
@@ -50,7 +60,7 @@ def create_user(user: User):
 #   return users
 
 
-@app.get("/users")
+@app.get("/users", response_model=list[UserOut])
 def list_users():
     db = SessionLocal()
     return db.query(UserModel).all()
@@ -76,7 +86,7 @@ def update_user(user_id: int, user: User):
     db_user.age = user.age
     db.commit()
 
-    return {"message": f"Updated user {user_id} to {use.nrame}, age {user.age}"}
+    return {"message": f"Updated user {user_id} to {user.name}, age {user.age}"}
 
 @app.delete("/users/{user_id}")
 def delete_user(user_id: int):
