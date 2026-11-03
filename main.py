@@ -2,7 +2,7 @@ from database import SessionLocal
 from models import User as UserModel
 from fastapi import FastAPI
 from pydantic import BaseModel
-from auth import hash_password, verify_password
+from auth import hash_password, verify_password, create_access_token
 from pydantic import ConfigDict
 
 app = FastAPI()
@@ -117,8 +117,8 @@ def login(email: str, password: str):
         return {"error": "User not found"}
     
     if verify_password(password, db_user.hashed_password):
-        return {"message": "Login Succesful"}
+        token = create_access_token(db_user.email)
+        return {"access_token": token, "token_type": "bearer"}
     else:
         return {"error": "Passwords do not match"}
-
-
+    
