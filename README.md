@@ -19,7 +19,8 @@ A REST API built with FastAPI and PostgreSQL for managing users. It supports cre
 - Delete a user (`DELETE /users/{user_id}`)
 - Log in with email and password (`POST /login`), checked against the stored hash
 - Database credentials kept out of the code in a `.env` file
-
+- JWT authentication: protected update and delete routes, and users can only modify their own account
+- Dockerized with Docker Compose: the API and PostgreSQL start with one command
 # Setup
 
 1. Clone the repository:
