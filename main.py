@@ -1,12 +1,13 @@
-from database import SessionLocal
+from database import SessionLocal, engine, Base
 from models import User as UserModel
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends, HTTPException
 from pydantic import BaseModel
-from auth import hash_password, verify_password, create_access_token
+from auth import hash_password, verify_password, create_access_token, get_current_user_email
 from pydantic import ConfigDict
 
 app = FastAPI()
 
+Base.metadata.create_all(bind=engine)
 
 #@app.get("/")
 #def home():
@@ -75,31 +76,37 @@ def list_users():
 
 
 @app.put("/users/{user_id}")
-def update_user(user_id: int, user: User):
+def update_user(user_id: int, user: User, current_user: str = Depends(get_current_user_email)):
     db = SessionLocal()
     db_user = db.query(UserModel).filter(UserModel.id == user_id).first()
 
     if db_user is None:
         return {"error": "User not found"}
-
+    if db_user.email != current_user:
+        raise HTTPException(status_code=403, detail="You can only update your own account")
     db_user.name = user.name
     db_user.age = user.age
     db.commit()
 
     return {"message": f"Updated user {user_id} to {user.name}, age {user.age}"}
 
+    
+
 @app.delete("/users/{user_id}")
-def delete_user(user_id: int):
+def delete_user(user_id: int, current_user: str = Depends(get_current_user_email)):
     db = SessionLocal()
     db_user = db.query(UserModel).filter(UserModel.id == user_id).first()
     
     if db_user is None:
         return {"error": "User not found"}
+    if db_user.email != current_user:
+        raise HTTPException(status_code=403, detail="You can only delete your own account")
     
     db.delete(db_user)  
     db.commit()  
     
     return {"message": f"Deleted user {db_user.name}"}
+    
 #@app.delete("/users/{user_id}")
 #def delete_user(user_id: int):
 #    if user_id < 0 or user_id >= len(users):
