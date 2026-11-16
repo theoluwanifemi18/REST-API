@@ -1,3 +1,4 @@
+Live demo: https://rest-api-k7v4.onrender.com/docs
 # Personal API
 
 A REST API built with FastAPI and PostgreSQL for managing users. It supports creating, listing, updating and deleting users, stores passwords as bcrypt hashes instead of plain text, and includes a login endpoint that verifies a user's password.
